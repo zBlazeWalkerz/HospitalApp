@@ -1,4 +1,6 @@
-﻿using HospitalApp.Models;
+﻿using FluentValidation;
+using HospitalApp.Contracts.ClientContracts;
+using HospitalApp.Domain.Model;
 using HospitalApp.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,11 +10,13 @@ namespace HospitalApp.Controllers
     {
         private readonly ClientService _clientService;
         private readonly ReminderService _reminderService;
+        private readonly IValidator<CreateClientRequest> _validator;
 
-        public ClientController(ClientService clientService, ReminderService reminderService)
+        public ClientController(ClientService clientService, ReminderService reminderService, IValidator<CreateClientRequest> validator)
         {
             _clientService = clientService;
             _reminderService = reminderService;
+            _validator = validator;
         }
 
 
@@ -35,15 +39,17 @@ namespace HospitalApp.Controllers
         // POST: Client/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Client client)
+        public async Task<IActionResult> Create(CreateClientRequest request)
         {
-            if (ModelState.IsValid)
-            {
-                await _reminderService.ProcessAndSendRemindersAsync(); //test
-                await _clientService.AddClientAsync(client);
-                return RedirectToAction(nameof(List));
-            }
-            return View(client);
+            var validationResult = _validator.Validate(request);
+            
+            if (!validationResult.IsValid)
+                return View(request);
+            
+            var client = request.MapToClient();
+            await _clientService.AddClientAsync(client);
+            
+            return RedirectToAction(nameof(List));
         }
 
         // GET: Client/Edit/{id}

@@ -1,9 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace HospitalApp.Domain.Model;
 
-namespace HospitalApp.Models
+public class Client
 {
-    public class Client
-    {
+
         public int Id { get; set; }
         public string PersonalNumber { get; set; } = string.Empty;
         public string? EmailAddress { get; set; }
@@ -18,5 +17,4 @@ namespace HospitalApp.Models
         public string? Notes { get; set; }
         public ICollection<ReminderSchedule> ReminderSchedules { get; set; } = new List<ReminderSchedule>();
         public ICollection<SmsLog> SmsLogs { get; set; } = new List<SmsLog>();
-    }
 }
